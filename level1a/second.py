@@ -1,4 +1,22 @@
 import json
+def optimize(graph,path):
+    distance = sum(graph[path[i]][path[i+1]] for i in range(len(path) - 1))
+
+    improved = True
+    while improved:
+        improved = False
+        for i in range(1, len(path) - 2):
+            for j in range(i + 1, len(path)):
+                if j - i == 1:
+                    continue
+                new_path = path[:]
+                new_path[i:j] = path[j - 1:i - 1:-1]
+                new_distance = sum(graph[new_path[k]][new_path[k + 1]] for k in range(len(new_path) - 1))
+                if new_distance < distance:
+                    path = new_path
+                    distance = new_distance
+                    improved = True
+    return path
 
 def tsp(distances, order_sizes, start, capacity):
     nodes = list(distances.keys())
@@ -11,6 +29,7 @@ def tsp(distances, order_sizes, start, capacity):
     while nodes:
         nearest_neighbor = min(nodes, key=lambda node: distances[current_node][node])
         if current_capacity + order_sizes[nearest_neighbor] > capacity:
+            current_path = optimize(distances,current_path)
             if(len(current_path)>1):
                 current_path.append(start)
                 paths.append(current_path)
